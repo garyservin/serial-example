@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<package>
+  <name>serial_example</name>
+  <version>0.0.0</version>
+  <description>Example package for using http://wjwwood.io/serial/ library</description>
+
+  <author email="garyservin@gmail.com">Gary Servin</author>
+
+  <maintainer email="garyservin@gmail.com">Gary Servin</maintainer>
+
+  <license>BSD</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>serial</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <run_depend>serial</run_depend>
+  <run_depend>std_msgs</run_depend>
+
+</package>
