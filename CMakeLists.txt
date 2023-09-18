@@ -18,8 +18,12 @@ include_directories(
 )
 
 add_executable(serial_example_node src/serial_example_node.cpp)
+add_executable(listener src/listener.cpp)
 
 target_link_libraries(serial_example_node
+  ${catkin_LIBRARIES}
+)
+target_link_libraries(listener
   ${catkin_LIBRARIES}
 )
 

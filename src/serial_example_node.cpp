@@ -37,9 +37,9 @@ int main (int argc, char** argv){
 
     try
     {
-        ser.setPort("/dev/ttyACM0");
-        ser.setBaudrate(9600);
+        ser.setPort("/dev/ttyUSB0");
         serial::Timeout to = serial::Timeout::simpleTimeout(1000);
+        ser.setBaudrate(115200);
         ser.setTimeout(to);
         ser.open();
     }
@@ -55,20 +55,20 @@ int main (int argc, char** argv){
         return -1;
     }
 
-    ros::Rate loop_rate(5);
+    ros::Rate loop_rate(1000);   // comm velocity
     while(ros::ok()){
 
         ros::spinOnce();
 
         if(ser.available()){
-            ROS_INFO_STREAM("Reading from serial port");
+            //ROS_INFO_STREAM("Reading from serial port");
             std_msgs::String result;
             result.data = ser.read(ser.available());
-            ROS_INFO_STREAM("Read: " << result.data);
+            //ROS_INFO_STREAM("Read: " << result.data);
+            ROS_INFO_STREAM(result.data);       // print comm results
             read_pub.publish(result);
         }
         loop_rate.sleep();
 
     }
 }
-
