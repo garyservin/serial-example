@@ -24,7 +24,7 @@
 serial::Serial ser;
 
 void write_callback(const std_msgs::String::ConstPtr& msg){
-    ROS_INFO_STREAM("Writing to serial port" << msg->data);
+    ROS_INFO_STREAM("Writing to serial port" << msg->data); 
     ser.write(msg->data);
 }
 
