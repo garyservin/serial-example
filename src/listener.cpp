@@ -3,7 +3,7 @@
 /////////////////////
 #include "ros/ros.h"
 #include "std_msgs/String.h"
-
+#include "sensor_msgs/PointCloud.h"
 
 
 
@@ -103,7 +103,26 @@ int main(int argc, char **argv)
   // 먼저 여기를 통해 통신 데이터 수신을 받는다. -> chatterCallback 함수 호출
   // ros::Subscriber sensor_mode = serial.subscribe("sensor", 1000, modeCallback);
   ros::Subscriber sub = serial.subscribe("read", 1000, chatterCallback);
-  ros::spin();
+  ros::Publisher pub_all = serial.advertise<sensor_msgs::PointCloud>("local_sys", 100);
+
+	while(ros::ok()){
+
+		ros::spinOnce();
+
+		sensor_msgs::PointCloud all_sensor;			// 메세지 구조체 선언
+		all_sensor.points.resize(9);				// Points 개수는 총 9개
+
+		for(kk=0; kk < 9; kk++){					// 반복문을 통해 센서 9개 값 메세지에 저장
+			all_sensor.points[kk].x = hall_[kk].x_val_real;
+			all_sensor.points[kk].y = hall_[kk].y_val_real;
+			all_sensor.points[kk].z = hall_[kk].z_val_real;
+		}
+		
+		pub_all.publish(all_sensor);				// 최종적으로 publish
+
+	}
+
+  
 
   return 0;
 }
