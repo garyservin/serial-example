@@ -5,7 +5,21 @@
 # nonlinear least squares curve-fitting problems.
 # https://people.duke.edu/~hpgavin/ce281/lm.pdf
 
-import ros_numpy as np
+'''
+해당 .py파일에는 함수가 총 6가지가 정의됨. 한국어로 번역해서 설명을 옮기겠음.
+
+    - lm_func: 비선형 최소제곱 곡선 피팅에 사용되는 모델 함수를 정의
+    - lm_FD_J: 유한 차분을 이용하여 자코비안 dy/dp를 계산
+    - lm_Broyden_J: Broyden 방정식을 사용하여 자코비안 행렬을 rank-1 업데이트함
+    - lm_matx: 선형화된 최적 행렬 JtWJ 및 벡터 JtWdy를 평가하고 Chi-squared 오차 함수 Chi_sq를 계산한다.
+               이 함수는 아래 lm 함수에서 사용됨
+    - lm: Levenberg-Marquardt 곡선 최적화: 가중된 오차 제곱 겂의 합을 최소화함
+    - make_lm_plots: 그래프를 띄우는 함수
+'''
+
+
+
+import numpy as np
 import seaborn as sns
 import matplotlib.pylab as pl
 import matplotlib.pyplot as plt
@@ -110,8 +124,8 @@ def lm_Broyden_J(p_old,y_old,J,p,y):
     
     h = p - p_old
     
-    a = (np.array([y - y_old]).T - J@h)@h.T
-    b = h.T@h
+    a = np.cross( (np.array([y - y_old]).T - np.cross(J,h)) , h.T )
+    b = np.cross (h.T , h)
 
     # Broyden rank-1 update eq'n
     J = J + a/b
@@ -171,11 +185,11 @@ def lm_matx(t,p_old,y_old,dX2,J,p,y_dat,weight,dp):
     delta_y = np.array([y_dat - y_hat]).T
     
     # Chi-squared error criteria
-    Chi_sq = delta_y.T @ ( delta_y * weight )  
+    Chi_sq = np.cross ( delta_y.T , ( delta_y * weight )  )
 
-    JtWJ  = J.T @ ( J * ( weight * np.ones((1,Npar)) ) )
+    JtWJ  = np.cross ( J.T , ( J * ( weight * np.ones((1,Npar)) ) ) )
     
-    JtWdy = J.T @ ( weight * delta_y )
+    JtWdy = np.cross ( J.T , ( weight * delta_y ) )
     
     
     return JtWJ,JtWdy,Chi_sq,y_hat,J
@@ -243,7 +257,7 @@ def lm(p,t,y_dat):
         R_sq = 0
 
     # weights or a scalar weight value ( weight >= 0 )
-    weight = 1/(y_dat.T@y_dat)
+    weight = 1 / ( np.cross(y_dat.T, y_dat) )
     # fractional increment of 'p' for numerical derivatives
     dp = [-0.001]      
     # lower bounds for parameter values
@@ -321,12 +335,12 @@ def lm(p,t,y_dat):
 
         func_calls = func_calls + 1
         # Chi-squared error criteria
-        X2_try = delta_y.T @ ( delta_y * weight )
+        X2_try = np.cross( delta_y.T , ( delta_y * weight ) )
         
         # % Quadratic
         if Update_Type == 2:                        
           # One step of quadratic line update in the h direction for minimum X2
-          alpha =  np.divide(JtWdy.T @ h, ( (X2_try - X2)/2 + 2*JtWdy.T@h ))
+          alpha =  np.divide( np.cross(JtWdy.T , h) , ( (X2_try - X2)/2 + 2*( np.cross(JtWdy.T, h )) ))
           h = alpha * h
           
           # % update only [idx] elements
@@ -338,9 +352,9 @@ def lm(p,t,y_dat):
           delta_y = y_dat - lm_func(t,p_try)     
           func_calls = func_calls + 1
           # % Chi-squared error criteria
-          X2_try = delta_y.T @ ( delta_y * weight )   
+          X2_try = np.cross( delta_y.T , ( delta_y * weight )   )
   
-        rho = np.matmul( h.T @ (lambda_ * h + JtWdy),np.linalg.inv(X2 - X2_try))
+        rho = np.matmul( np.cross( h.T , (lambda_ * h + JtWdy) ) , np.linalg.inv(X2 - X2_try))
     
         # it IS significantly better
         if ( rho > epsilon_4 ):                         
@@ -411,7 +425,7 @@ def lm(p,t,y_dat):
     #  ---- Error Analysis ----
     #  recompute equal weights for paramter error analysis
     if np.var(weight) == 0:   
-        weight = DoF/(delta_y.T@delta_y) * np.ones((Npnt,1))
+        weight = DoF/( np.cross(delta_y.T, delta_y) ) * np.ones((Npnt,1))
       
     # % reduced Chi-square                            
     redX2 = X2 / DoF
@@ -426,12 +440,12 @@ def lm(p,t,y_dat):
     # standard error of the fit
     sigma_y = np.zeros((Npnt,1))
     for i in range(Npnt):
-        sigma_y[i,0] = J[i,:] @ covar_p @ J[i,:].T        
+        sigma_y[i,0] = np.cross( np.cross(J[i,:] , covar_p) , J[i,:].T  )
 
     sigma_y = np.sqrt(sigma_y)
 
     # parameter correlation matrix
-    corr_p = covar_p / [sigma_p@sigma_p.T]
+    corr_p = covar_p / [np.cross(sigma_p, sigma_p.T)]
         
     # coefficient of multiple determination
     R_sq = np.correlate(y_dat, y_hat)
@@ -507,7 +521,7 @@ def make_lm_plots(x,y,cvg_hst):
         for j in range(len(p4)):
             pt = np.array([[p_hst[-1,0],p2[i],p_hst[-1,2],p4[j]]]).T
             delta_y = y - lm_func(x,pt)
-            X2[j,i] = np.log((delta_y.T @ delta_y)/(len(x)-len(p_fit)))    
+            X2[j,i] = np.log(np.cross(delta_y.T , delta_y)/(len(x)-len(p_fit)))    
     p2_grid, p4_grid = np.meshgrid(p2, p4)
     # make surface plot
     ax4.plot_surface(p2_grid, p4_grid, X2, cmap='coolwarm', antialiased=True)
