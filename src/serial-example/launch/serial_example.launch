@@ -1,9 +1,24 @@
 <launch>
-    <node pkg="serial_example" type="listener" name="sensor_valuse_node"/>
+    <node pkg="serial_example" type="listener" name="sensor_packet_node"/>
     <node pkg="serial_example" type="serial_example_node" name="rosserial_node"/>
 </launch>
 
 <!-- node pkg="해당 노드가 있는 패키지 이름"
      type = "roslaunch로 실행시킬 노드 이름"
      name = "roslaunch로 실행시킬 때 새롭게 붙일 노드 이름"
+
+    해당 launch 파일을 실행시키려면 
+    
+        "roslaunch serial_example serial_example.launch" 
+    
+    를 cmd에 적으면 됩니다.
+
+
+    참고로 실행할 때 USB Port가 안 열려있다는 에러가 뜰 수 있는데, 이 때는
+
+        sudo chmod 766 /dev/ttyUSB0
+
+    를 적어서 Port의 권한을 설정해주면 됩니다.
+
 -->
+

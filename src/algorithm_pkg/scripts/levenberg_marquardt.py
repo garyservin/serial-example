@@ -4,6 +4,7 @@
 # Code adapted from Gavin, H.P. (2020) The Levenberg-Marquardt method for 
 # nonlinear least squares curve-fitting problems.
 # https://people.duke.edu/~hpgavin/ce281/lm.pdf
+# github: https://github.com/abnerbog/levenberg-marquardt-method/blob/main/example_LM.py
 
 '''
 해당 .py파일에는 함수가 총 6가지가 정의됨. 한국어로 번역해서 설명을 옮기겠음.
@@ -13,7 +14,7 @@
     - lm_Broyden_J: Broyden 방정식을 사용하여 자코비안 행렬을 rank-1 업데이트함
     - lm_matx: 선형화된 최적 행렬 JtWJ 및 벡터 JtWdy를 평가하고 Chi-squared 오차 함수 Chi_sq를 계산한다.
                이 함수는 아래 lm 함수에서 사용됨
-    - lm: Levenberg-Marquardt 곡선 최적화: 가중된 오차 제곱 겂의 합을 최소화함
+    - lm: Levenberg-Marquardt 곡선 최적화: 가중된 오차 제곱 값의 합을 최소화함
     - make_lm_plots: 그래프를 띄우는 함수
 '''
 
@@ -462,6 +463,11 @@ def lm(p,t,y_dat):
         print('standard error = %0.2f %%' % error_p[i,0])
     
     return p,redX2,sigma_p,sigma_y,corr_p,R_sq,cvg_hst
+
+
+
+
+
 
 def make_lm_plots(x,y,cvg_hst):
     
